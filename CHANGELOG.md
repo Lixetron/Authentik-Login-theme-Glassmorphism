@@ -4,6 +4,32 @@ All notable changes to this theme are documented in this file.
 
 Format: [Semantic Versioning](https://semver.org/) (MAJOR.MINOR.PATCH).
 
+## [Unreleased]
+
+### Fixed
+
+- **Top edge of the "Log in" / "Continue" button disappearing on hover**:
+  PatternFly ships `.pf-c-form__group.pf-m-action { overflow: hidden }`, and the
+  2px hover lift pushed the button's top edge (border + inset highlight) outside
+  the group, where it was clipped. Action groups inside the flow card now get
+  `overflow: visible` (nothing in them needs clipping).
+- **Janky hover animation**: the light sweep animated `left`, which forces layout
+  and repaint of the button on every frame, and it played backwards when the
+  pointer left. It now moves with `transform: translate3d()` and only animates
+  on hover-in. The lift uses an ease-out curve (`cubic-bezier(0.22, 1, 0.36, 1)`)
+  and `will-change: transform` so the layer is ready before the hover starts.
+
+### Changed
+
+- **User menu dropdown redesigned as glass** (`<ak-user-switcher>`): the account
+  switcher / "Sign out" menu now matches the rest of the theme — translucent
+  blurred panel (`blur(24px)`, 16px radius, soft shadow), white text, rounded
+  hover rows, muted descriptions and a glass divider.
+- Per-button `backdrop-filter` removed (the card behind the buttons is already
+  blurred): less work per hover frame, no visible difference.
+
+---
+
 ## [V4.0.1] — 2026-10-20 (fixes after testing on Authentik 2026.8.4)
 
 ### Fixed

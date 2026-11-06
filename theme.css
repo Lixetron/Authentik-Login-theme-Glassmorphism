@@ -883,26 +883,33 @@ ak-flow-card .pf-c-button.pf-m-primary,
     color: var(--glass-text) !important;
     background: var(--glass-btn-bg) !important;
     border: 1px solid var(--glass-btn-border) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
-    backdrop-filter: blur(10px) !important;
+    /* No backdrop-filter here on purpose: the card behind the button is already
+       blurred, and re-blurring it on every hover frame made the lift stutter. */
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
-    transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease !important;
+    will-change: transform;
+    transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1) !important;
 }
 
+/* Light sweep: compositor-only (transform), never the `left` property, so the
+   effect does not force layout/repaint on every frame and does not scroll back
+   across the button when the pointer leaves. */
 ak-flow-card .pf-c-button.pf-m-primary::before,
 :host(ak-stage-authenticator-validate-code) .pf-c-button.pf-m-primary::before {
     content: "";
     position: absolute;
-    inset: 0 auto 0 -100%;
+    inset: 0;
     width: 100%;
+    border-radius: inherit;
     background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%);
-    transition: left 0.6s ease;
+    transform: translate3d(-100%, 0, 0);
+    transition: none;
     pointer-events: none;
 }
 
 ak-flow-card .pf-c-button.pf-m-primary:hover::before,
 :host(ak-stage-authenticator-validate-code) .pf-c-button.pf-m-primary:hover::before {
-    left: 100%;
+    transform: translate3d(100%, 0, 0);
+    transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 ak-flow-card .pf-c-button.pf-m-primary:hover,
@@ -927,10 +934,11 @@ ak-flow-card .pf-c-button.pf-m-tertiary,
     color: var(--glass-text) !important;
     background: rgba(255, 255, 255, 0.08) !important;
     border: 1px solid var(--glass-control-border) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
-    backdrop-filter: blur(10px) !important;
+    /* Same reason as the primary button: no per-button backdrop-filter, the
+       card already provides the blur. */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-    transition: background 0.3s ease, transform 0.3s ease, border-color 0.3s ease !important;
+    will-change: transform;
+    transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1) !important;
 }
 
 ak-flow-card .pf-c-button.pf-m-secondary:hover,
@@ -978,6 +986,17 @@ ak-flow-card .pf-c-button:focus-visible,
 ak-flow-card .pf-c-form__group.pf-m-action,
 ak-flow-card .pf-c-form__actions {
     margin-top: 8px !important;
+}
+
+/* PatternFly clips `.pf-c-form__group.pf-m-action` with `overflow: hidden`.
+   That clipped the top of the submit button while its 2px hover lift was
+   applied ("the top edge of the button disappears"). Nothing inside an action
+   group needs clipping, so let the lift paint outside the group. */
+ak-flow-card .pf-c-form__group.pf-m-action,
+:host(ak-stage-authenticator-validate-code) .pf-c-form__group.pf-m-action,
+:host(ak-stage-authenticator-validate-duo) .pf-c-form__group.pf-m-action,
+:host(ak-stage-authenticator-validate-webauthn) .pf-c-form__group.pf-m-action {
+    overflow: visible !important;
 }
 
 /* "Stay signed in?" -> Yes / No side by side, "No" with a red tint */
@@ -1049,10 +1068,9 @@ ak-flow-card .source-button {
     background: rgba(255, 255, 255, 0.1) !important;
     border: 1px solid rgba(255, 255, 255, 0.25) !important;
     border-radius: 12px !important;
-    -webkit-backdrop-filter: blur(10px) !important;
-    backdrop-filter: blur(10px) !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-    transition: background 0.3s ease, transform 0.3s ease, border-color 0.3s ease !important;
+    will-change: transform;
+    transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1) !important;
 }
 
 ak-flow-card .source-button:hover {
@@ -1928,6 +1946,7 @@ ak-interface-admin::part(brand) {
     :host(ak-library-impl) .pf-c-card {
         transition: none !important;
         transform: none !important;
+        will-change: auto !important;
     }
 
     ak-flow-card .pf-c-button.pf-m-primary::before {
