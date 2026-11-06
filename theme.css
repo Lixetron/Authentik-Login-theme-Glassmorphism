@@ -1292,6 +1292,50 @@ ak-interface-user::part(page__header),
     z-index: 1000 !important;
 }
 
+/* --- User menu ("Sign out" / account switcher) dropdown --- */
+/* Rendered by <ak-user-switcher> (the 2026.8 account switcher): a
+   <menu class="pf-c-dropdown__menu pf-m-align-right" part="menu"> inside its
+   own shadow root, hence the :host(ak-user-switcher) scope. */
+:host(ak-user-switcher) .pf-c-dropdown__menu,
+:host(ak-user-switcher) .pf-c-dropdown__menu.pf-m-align-right {
+    padding: 6px !important;
+    color: var(--glass-text) !important;
+    background: rgba(18, 20, 26, 0.72) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+    backdrop-filter: blur(24px) saturate(160%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+:host(ak-user-switcher) .pf-c-dropdown__menu-item {
+    color: var(--glass-text) !important;
+    background: transparent !important;
+    border-radius: 10px !important;
+    text-decoration: none !important;
+    transition: background 0.2s ease, color 0.2s ease !important;
+}
+
+:host(ak-user-switcher) .pf-c-dropdown__menu-item:not(:disabled):hover,
+:host(ak-user-switcher) .pf-c-dropdown__menu-item:focus-visible {
+    color: var(--glass-text) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    text-decoration: none !important;
+}
+
+:host(ak-user-switcher) [part="name"] {
+    color: var(--glass-text) !important;
+}
+
+:host(ak-user-switcher) [part="description"] {
+    color: var(--glass-text-muted) !important;
+}
+
+:host(ak-user-switcher) .pf-c-dropdown .pf-c-divider {
+    --pf-c-divider--after--BackgroundColor: rgba(255, 255, 255, 0.15) !important;
+    margin: 6px 0 !important;
+}
+
 ak-interface-user::part(brand) {
     display: flex !important;
     align-items: center !important;
