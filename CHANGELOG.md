@@ -21,6 +21,16 @@ Format: [Semantic Versioning](https://semver.org/) (MAJOR.MINOR.PATCH).
 
 ### Changed
 
+- **User settings tabs redesigned as glass** (`<ak-tabs>`): the vertical
+  navigation is now a floating frosted panel (blurred translucent background,
+  hairline border, 18px radius, soft shadow) instead of a flat list with
+  PatternFly divider lines. Each tab is a rounded glass row with a hover
+  highlight; the active row gets a brighter frosted gradient, an inset
+  highlight and a short glowing accent pill on the left (the old full-height
+  blue bar is gone). Horizontal tabs on narrow screens use the same glass shell
+  with a small accent underline. Colours are exposed as `--glass-tabs-*`
+  variables, and the hover transition is disabled under
+  `prefers-reduced-motion`.
 - **User menu dropdown redesigned as glass** (`<ak-user-switcher>`): the account
   switcher / "Sign out" menu now matches the rest of the theme — translucent
   blurred panel (`blur(24px)`, 16px radius, soft shadow), white text, rounded
