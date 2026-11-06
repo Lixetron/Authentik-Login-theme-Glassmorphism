@@ -18,9 +18,26 @@ Format: [Semantic Versioning](https://semver.org/) (MAJOR.MINOR.PATCH).
   pointer left. It now moves with `transform: translate3d()` and only animates
   on hover-in. The lift uses an ease-out curve (`cubic-bezier(0.22, 1, 0.36, 1)`)
   and `will-change: transform` so the layer is ready before the hover starts.
+- **Opaque dark column with checkboxes in the user session / token / MFA
+  tables**: PatternFly declares `--pf-c-table--BackgroundColor` on the `<table>`
+  itself, so the theme's transparent override on `:root` never reached it.
+  Authentik also makes the checkbox column `position: sticky` and paints it with
+  that variable, which left a solid dark strip next to the glass rows. The
+  variable is now overridden on the table and the checkbox column is no longer
+  sticky, so it blends with the rest of the row.
 
 ### Changed
 
+- **User settings tables redesigned as glass** (sessions, tokens, consents, MFA
+  devices, reputation): each table now sits in a rounded frosted shell
+  (translucent background, hairline border, 18px radius, soft shadow, 8px inner
+  padding and a 16px gap from the card edges), the header row is a quiet frosted
+  band with rounded top corners and smaller muted labels, rows have hairline
+  separators, a soft hover highlight, a tinted selected state and vertically
+  centred cells. Secondary text (location / browser / exact date) is muted, the
+  elapsed timestamp stays prominent, and checkboxes are now glass squares with
+  an accent check mark instead of native dark controls. Colours are exposed as
+  `--glass-table-*` variables.
 - **User settings tabs redesigned as glass** (`<ak-tabs>`): the vertical
   navigation is now a floating frosted panel (blurred translucent background,
   hairline border, 18px radius, soft shadow) instead of a flat list with

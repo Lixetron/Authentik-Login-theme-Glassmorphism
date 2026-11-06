@@ -231,11 +231,21 @@
     --ak-c-divider--strong-color: rgba(255, 255, 255, 0.35);
 
     /* Tables (user settings lists) */
+    --glass-table-bg: rgba(255, 255, 255, 0.045);
+    --glass-table-border: rgba(255, 255, 255, 0.12);
+    --glass-table-radius: 18px;
+    --glass-table-padding: 8px;
+    --glass-table-margin: 16px;
+    --glass-table-header-bg: rgba(255, 255, 255, 0.06);
+    --glass-table-row-hover: rgba(255, 255, 255, 0.07);
+    --glass-table-row-selected: rgba(127, 176, 255, 0.14);
+    --glass-table-blur: blur(18px) saturate(140%);
+
     --pf-c-table--BackgroundColor: transparent;
     --pf-c-table--cell--BackgroundColor: transparent;
     --pf-c-table--cell--Color: rgba(255, 255, 255, 0.9);
-    --pf-c-table--BorderColor: rgba(255, 255, 255, 0.1);
-    --pf-c-table--cell--BorderBottomColor: rgba(255, 255, 255, 0.1);
+    --pf-c-table--BorderColor: var(--glass-table-border);
+    --pf-c-table--cell--BorderBottomColor: var(--glass-table-border);
     --pf-c-table--m-grid-md__tr--BorderColor: rgba(255, 255, 255, 0.08);
     --pf-c-table__sort__button--Color: rgba(255, 255, 255, 0.85);
     --pf-c-table__sort__button--hover--Color: var(--glass-text);
@@ -2180,16 +2190,71 @@ ak-library-impl::part(card-header-actions-button):hover {
 }
 
 /* Lists (sessions, consents, MFA devices, tokens, reputation) */
+/* These PatternFly tables live in the shadow root of each list component.
+   PF4 re-declares `--pf-c-table--BackgroundColor` on the <table> itself, so the
+   transparent value from :root never reaches it. Authentik also makes the
+   checkbox column `position: sticky` and paints it with that variable — which
+   is why the column stayed an opaque dark strip. The table now sits in a
+   frosted shell, the sticky column is retired and the checkboxes match the
+   glass controls used on the login screens. */
+
 :host(ak-user-session-list) .pf-c-table,
 :host(ak-user-settings-mfa) .pf-c-table,
 :host(ak-user-consent-list) .pf-c-table,
 :host(ak-user-reputation-list) .pf-c-table,
-:host(ak-user-token-list) .pf-c-table,
-:host(ak-user-session-list) .pf-c-table tr,
-:host(ak-user-settings-mfa) .pf-c-table tr,
-:host(ak-user-consent-list) .pf-c-table tr,
-:host(ak-user-reputation-list) .pf-c-table tr,
-:host(ak-user-token-list) .pf-c-table tr,
+:host(ak-user-token-list) .pf-c-table {
+    --pf-c-table--BackgroundColor: transparent;
+    --pf-c-table--BorderColor: var(--glass-table-border);
+    --pf-c-table--cell--BorderBottomColor: var(--glass-table-border);
+    --pf-c-table--tr--m-hoverable--BackgroundColor: transparent;
+    --pf-c-table--tr--m-hoverable--hover--BackgroundColor: var(--glass-table-row-hover);
+    --pf-c-table--tr--m-hoverable--focus--BackgroundColor: var(--glass-table-row-hover);
+    --pf-c-table--tr--m-hoverable--active--BackgroundColor: var(--glass-table-row-hover);
+    --pf-c-table--tr--m-hoverable--hover--BoxShadow: none;
+    --pf-c-table--tr--m-hoverable--focus--BoxShadow: none;
+    --pf-c-table--tr--m-hoverable--active--BoxShadow: none;
+    --pf-c-table--tr--m-selected--BackgroundColor: var(--glass-table-row-selected);
+    --pf-c-table--tr--m-selected--BoxShadow: none;
+    --pf-c-table__sort-indicator--Color: rgba(255, 255, 255, 0.35);
+    --pf-c-table--m-compact--cell--PaddingTop: 12px;
+    --pf-c-table--m-compact--cell--PaddingBottom: 12px;
+    --pf-c-table--m-compact-th--PaddingTop: 10px;
+    --pf-c-table--m-compact-th--PaddingBottom: 10px;
+
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Frosted shell around the table instead of the old flat borderless list */
+ak-user-session-list::part(table-container),
+ak-user-consent-list::part(table-container),
+ak-user-settings-mfa::part(table-container),
+ak-user-token-list::part(table-container),
+ak-user-reputation-list::part(table-container),
+:host(ak-user-session-list) [part="table-container"],
+:host(ak-user-consent-list) [part="table-container"],
+:host(ak-user-settings-mfa) [part="table-container"],
+:host(ak-user-token-list) [part="table-container"],
+:host(ak-user-reputation-list) [part="table-container"] {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 4px var(--glass-table-margin) var(--glass-table-margin) !important;
+    padding: var(--glass-table-padding) !important;
+    -webkit-overflow-scrolling: touch !important;
+    background: var(--glass-table-bg) !important;
+    border: 1px solid var(--glass-table-border) !important;
+    border-radius: var(--glass-table-radius) !important;
+    -webkit-backdrop-filter: var(--glass-table-blur) !important;
+    backdrop-filter: var(--glass-table-blur) !important;
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Toolbar / pagination / cards around the table stay transparent */
 :host(ak-user-session-list) .pf-c-toolbar,
 :host(ak-user-settings-mfa) .pf-c-toolbar,
 :host(ak-user-consent-list) .pf-c-toolbar,
@@ -2210,12 +2275,269 @@ ak-library-impl::part(card-header-actions-button):hover {
     box-shadow: none !important;
 }
 
+/* --- Header row: a quiet frosted band with rounded top corners --- */
+:host(ak-user-session-list) .pf-c-table thead tr,
+:host(ak-user-settings-mfa) .pf-c-table thead tr,
+:host(ak-user-consent-list) .pf-c-table thead tr,
+:host(ak-user-reputation-list) .pf-c-table thead tr,
+:host(ak-user-token-list) .pf-c-table thead tr {
+    background: transparent !important;
+}
+
+:host(ak-user-session-list) .pf-c-table thead th,
+:host(ak-user-settings-mfa) .pf-c-table thead th,
+:host(ak-user-consent-list) .pf-c-table thead th,
+:host(ak-user-reputation-list) .pf-c-table thead th,
+:host(ak-user-token-list) .pf-c-table thead th {
+    background: var(--glass-table-header-bg) !important;
+    color: var(--glass-text-muted) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.03em !important;
+    border-bottom-color: var(--glass-table-border) !important;
+}
+
+:host(ak-user-session-list) .pf-c-table thead th:first-child,
+:host(ak-user-settings-mfa) .pf-c-table thead th:first-child,
+:host(ak-user-consent-list) .pf-c-table thead th:first-child,
+:host(ak-user-reputation-list) .pf-c-table thead th:first-child,
+:host(ak-user-token-list) .pf-c-table thead th:first-child {
+    border-top-left-radius: 10px !important;
+}
+
+:host(ak-user-session-list) .pf-c-table thead th:last-child,
+:host(ak-user-settings-mfa) .pf-c-table thead th:last-child,
+:host(ak-user-consent-list) .pf-c-table thead th:last-child,
+:host(ak-user-reputation-list) .pf-c-table thead th:last-child,
+:host(ak-user-token-list) .pf-c-table thead th:last-child {
+    border-top-right-radius: 10px !important;
+}
+
+/* Sortable headers: muted until hovered/active */
+:host(ak-user-session-list) .pf-c-table .pf-c-table__sort .pf-c-table__button,
+:host(ak-user-settings-mfa) .pf-c-table .pf-c-table__sort .pf-c-table__button,
+:host(ak-user-consent-list) .pf-c-table .pf-c-table__sort .pf-c-table__button,
+:host(ak-user-reputation-list) .pf-c-table .pf-c-table__sort .pf-c-table__button,
+:host(ak-user-token-list) .pf-c-table .pf-c-table__sort .pf-c-table__button {
+    color: var(--glass-text-muted) !important;
+}
+
+:host(ak-user-session-list) .pf-c-table .pf-c-table__sort .pf-c-table__button:hover,
+:host(ak-user-settings-mfa) .pf-c-table .pf-c-table__sort .pf-c-table__button:hover,
+:host(ak-user-consent-list) .pf-c-table .pf-c-table__sort .pf-c-table__button:hover,
+:host(ak-user-reputation-list) .pf-c-table .pf-c-table__sort .pf-c-table__button:hover,
+:host(ak-user-token-list) .pf-c-table .pf-c-table__sort .pf-c-table__button:hover {
+    color: var(--glass-text) !important;
+}
+
+:host(ak-user-session-list) .pf-c-table .pf-c-table__sort.pf-m-selected .pf-c-table__button,
+:host(ak-user-settings-mfa) .pf-c-table .pf-c-table__sort.pf-m-selected .pf-c-table__button,
+:host(ak-user-consent-list) .pf-c-table .pf-c-table__sort.pf-m-selected .pf-c-table__button,
+:host(ak-user-reputation-list) .pf-c-table .pf-c-table__sort.pf-m-selected .pf-c-table__button,
+:host(ak-user-token-list) .pf-c-table .pf-c-table__sort.pf-m-selected .pf-c-table__button {
+    color: var(--glass-text) !important;
+}
+
+:host(ak-user-session-list) .pf-c-table .pf-c-table__sort.pf-m-selected .pf-c-table__sort-indicator,
+:host(ak-user-settings-mfa) .pf-c-table .pf-c-table__sort.pf-m-selected .pf-c-table__sort-indicator,
+:host(ak-user-consent-list) .pf-c-table .pf-c-table__sort.pf-m-selected .pf-c-table__sort-indicator,
+:host(ak-user-reputation-list) .pf-c-table .pf-c-table__sort.pf-m-selected .pf-c-table__sort-indicator,
+:host(ak-user-token-list) .pf-c-table .pf-c-table__sort.pf-m-selected .pf-c-table__sort-indicator {
+    color: var(--glass-tabs-accent) !important;
+    filter: drop-shadow(0 0 6px rgba(127, 176, 255, 0.55));
+}
+
+/* --- Body rows: airy, hairline separators, soft hover/selection --- */
+:host(ak-user-session-list) .pf-c-table tbody tr,
+:host(ak-user-settings-mfa) .pf-c-table tbody tr,
+:host(ak-user-consent-list) .pf-c-table tbody tr,
+:host(ak-user-reputation-list) .pf-c-table tbody tr,
+:host(ak-user-token-list) .pf-c-table tbody tr {
+    transition: background-color 0.16s ease !important;
+}
+
+:host(ak-user-session-list) .pf-c-table tbody tr:hover,
+:host(ak-user-settings-mfa) .pf-c-table tbody tr:hover,
+:host(ak-user-consent-list) .pf-c-table tbody tr:hover,
+:host(ak-user-reputation-list) .pf-c-table tbody tr:hover,
+:host(ak-user-token-list) .pf-c-table tbody tr:hover,
+:host(ak-user-session-list) .pf-c-table tbody tr:focus-within,
+:host(ak-user-settings-mfa) .pf-c-table tbody tr:focus-within,
+:host(ak-user-consent-list) .pf-c-table tbody tr:focus-within,
+:host(ak-user-reputation-list) .pf-c-table tbody tr:focus-within,
+:host(ak-user-token-list) .pf-c-table tbody tr:focus-within {
+    background-color: var(--glass-table-row-hover) !important;
+    box-shadow: none !important;
+}
+
+:host(ak-user-session-list) .pf-c-table tbody tr[aria-selected="true"],
+:host(ak-user-settings-mfa) .pf-c-table tbody tr[aria-selected="true"],
+:host(ak-user-consent-list) .pf-c-table tbody tr[aria-selected="true"],
+:host(ak-user-reputation-list) .pf-c-table tbody tr[aria-selected="true"],
+:host(ak-user-token-list) .pf-c-table tbody tr[aria-selected="true"] {
+    background-color: var(--glass-table-row-selected) !important;
+    box-shadow: none !important;
+}
+
+:host(ak-user-session-list) .pf-c-table thead th,
+:host(ak-user-settings-mfa) .pf-c-table thead th,
+:host(ak-user-consent-list) .pf-c-table thead th,
+:host(ak-user-reputation-list) .pf-c-table thead th,
+:host(ak-user-token-list) .pf-c-table thead th,
 :host(ak-user-session-list) .pf-c-table tbody td,
 :host(ak-user-settings-mfa) .pf-c-table tbody td,
 :host(ak-user-consent-list) .pf-c-table tbody td,
 :host(ak-user-reputation-list) .pf-c-table tbody td,
 :host(ak-user-token-list) .pf-c-table tbody td {
-    border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+    border-bottom-color: var(--glass-table-border) !important;
+}
+
+:host(ak-user-session-list) .pf-c-table tbody td,
+:host(ak-user-settings-mfa) .pf-c-table tbody td,
+:host(ak-user-consent-list) .pf-c-table tbody td,
+:host(ak-user-reputation-list) .pf-c-table tbody td,
+:host(ak-user-token-list) .pf-c-table tbody td {
+    vertical-align: middle !important;
+}
+
+/* Secondary line (city — browser, OS) under the main cell value */
+:host(ak-user-session-list) .pf-c-table tbody td small,
+:host(ak-user-settings-mfa) .pf-c-table tbody td small,
+:host(ak-user-consent-list) .pf-c-table tbody td small,
+:host(ak-user-reputation-list) .pf-c-table tbody td small,
+:host(ak-user-token-list) .pf-c-table tbody td small {
+    display: block !important;
+    margin-top: 2px !important;
+    color: rgba(255, 255, 255, 0.48) !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+    text-shadow: none !important;
+}
+
+/* Timestamps: prominent elapsed time, muted exact date */
+:host(ak-user-session-list) .pf-c-table ak-timestamp,
+:host(ak-user-settings-mfa) .pf-c-table ak-timestamp,
+:host(ak-user-consent-list) .pf-c-table ak-timestamp,
+:host(ak-user-reputation-list) .pf-c-table ak-timestamp,
+:host(ak-user-token-list) .pf-c-table ak-timestamp {
+    --ak-timestamp--Color: rgba(255, 255, 255, 0.9);
+    --ak-timestamp--FontSize: 14px;
+    --ak-timestamp--FontStyle: normal;
+}
+
+:host(ak-user-session-list) .pf-c-table ak-timestamp::part(elapsed),
+:host(ak-user-settings-mfa) .pf-c-table ak-timestamp::part(elapsed),
+:host(ak-user-consent-list) .pf-c-table ak-timestamp::part(elapsed),
+:host(ak-user-reputation-list) .pf-c-table ak-timestamp::part(elapsed),
+:host(ak-user-token-list) .pf-c-table ak-timestamp::part(elapsed) {
+    font-weight: 500 !important;
+}
+
+:host(ak-user-session-list) .pf-c-table ak-timestamp::part(datetime),
+:host(ak-user-settings-mfa) .pf-c-table ak-timestamp::part(datetime),
+:host(ak-user-consent-list) .pf-c-table ak-timestamp::part(datetime),
+:host(ak-user-reputation-list) .pf-c-table ak-timestamp::part(datetime),
+:host(ak-user-token-list) .pf-c-table ak-timestamp::part(datetime) {
+    color: rgba(255, 255, 255, 0.45) !important;
+    font-size: 12px !important;
+}
+
+/* --- Checkbox column: no more opaque sticky strip --- */
+:host(ak-user-session-list) .pf-c-table .pf-c-table__check,
+:host(ak-user-settings-mfa) .pf-c-table .pf-c-table__check,
+:host(ak-user-consent-list) .pf-c-table .pf-c-table__check,
+:host(ak-user-reputation-list) .pf-c-table .pf-c-table__check,
+:host(ak-user-token-list) .pf-c-table .pf-c-table__check {
+    position: static !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Keep the header band's tint in the checkbox column as well */
+:host(ak-user-session-list) .pf-c-table thead th.pf-c-table__check,
+:host(ak-user-settings-mfa) .pf-c-table thead th.pf-c-table__check,
+:host(ak-user-consent-list) .pf-c-table thead th.pf-c-table__check,
+:host(ak-user-reputation-list) .pf-c-table thead th.pf-c-table__check,
+:host(ak-user-token-list) .pf-c-table thead th.pf-c-table__check {
+    background: var(--glass-table-header-bg) !important;
+}
+
+/* Glass checkboxes (same language as the login "Remember me" control) */
+:host(ak-user-session-list) .pf-c-table__check input[type="checkbox"],
+:host(ak-user-settings-mfa) .pf-c-table__check input[type="checkbox"],
+:host(ak-user-consent-list) .pf-c-table__check input[type="checkbox"],
+:host(ak-user-reputation-list) .pf-c-table__check input[type="checkbox"],
+:host(ak-user-token-list) .pf-c-table__check input[type="checkbox"] {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    display: block !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 0 !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    background-color: rgba(255, 255, 255, 0.06) !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: 12px 12px !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 5px !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+    transition:
+        background-color 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease !important;
+}
+
+:host(ak-user-session-list) .pf-c-table__check input[type="checkbox"]:hover,
+:host(ak-user-settings-mfa) .pf-c-table__check input[type="checkbox"]:hover,
+:host(ak-user-consent-list) .pf-c-table__check input[type="checkbox"]:hover,
+:host(ak-user-reputation-list) .pf-c-table__check input[type="checkbox"]:hover,
+:host(ak-user-token-list) .pf-c-table__check input[type="checkbox"]:hover {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.55) !important;
+}
+
+:host(ak-user-session-list) .pf-c-table__check input[type="checkbox"]:checked,
+:host(ak-user-settings-mfa) .pf-c-table__check input[type="checkbox"]:checked,
+:host(ak-user-consent-list) .pf-c-table__check input[type="checkbox"]:checked,
+:host(ak-user-reputation-list) .pf-c-table__check input[type="checkbox"]:checked,
+:host(ak-user-token-list) .pf-c-table__check input[type="checkbox"]:checked,
+:host(ak-user-session-list) .pf-c-table__check input[type="checkbox"]:indeterminate,
+:host(ak-user-settings-mfa) .pf-c-table__check input[type="checkbox"]:indeterminate,
+:host(ak-user-consent-list) .pf-c-table__check input[type="checkbox"]:indeterminate,
+:host(ak-user-reputation-list) .pf-c-table__check input[type="checkbox"]:indeterminate,
+:host(ak-user-token-list) .pf-c-table__check input[type="checkbox"]:indeterminate {
+    background-color: rgba(127, 176, 255, 0.85) !important;
+    border-color: rgba(160, 196, 255, 0.95) !important;
+    box-shadow: 0 0 0 3px rgba(127, 176, 255, 0.16) !important;
+}
+
+:host(ak-user-session-list) .pf-c-table__check input[type="checkbox"]:checked,
+:host(ak-user-settings-mfa) .pf-c-table__check input[type="checkbox"]:checked,
+:host(ak-user-consent-list) .pf-c-table__check input[type="checkbox"]:checked,
+:host(ak-user-reputation-list) .pf-c-table__check input[type="checkbox"]:checked,
+:host(ak-user-token-list) .pf-c-table__check input[type="checkbox"]:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.4 8.4l3.1 3.1 6.1-6.9' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+}
+
+:host(ak-user-session-list) .pf-c-table__check input[type="checkbox"]:indeterminate,
+:host(ak-user-settings-mfa) .pf-c-table__check input[type="checkbox"]:indeterminate,
+:host(ak-user-consent-list) .pf-c-table__check input[type="checkbox"]:indeterminate,
+:host(ak-user-reputation-list) .pf-c-table__check input[type="checkbox"]:indeterminate,
+:host(ak-user-token-list) .pf-c-table__check input[type="checkbox"]:indeterminate {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8h8' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+}
+
+:host(ak-user-session-list) .pf-c-table__check input[type="checkbox"]:focus-visible,
+:host(ak-user-settings-mfa) .pf-c-table__check input[type="checkbox"]:focus-visible,
+:host(ak-user-consent-list) .pf-c-table__check input[type="checkbox"]:focus-visible,
+:host(ak-user-reputation-list) .pf-c-table__check input[type="checkbox"]:focus-visible,
+:host(ak-user-token-list) .pf-c-table__check input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--glass-focus) !important;
+    outline-offset: 2px !important;
 }
 
 /* Toolbar buttons (Refresh, Delete, Create, Enroll) */
@@ -2252,17 +2574,6 @@ ak-library-impl::part(card-header-actions-button):hover {
     border: none !important;
 }
 
-/* Tables scroll horizontally on small screens instead of overflowing */
-ak-user-session-list::part(table-container),
-ak-user-consent-list::part(table-container),
-ak-user-settings-mfa::part(table-container),
-ak-user-token-list::part(table-container),
-ak-user-reputation-list::part(table-container) {
-    overflow-x: auto !important;
-    max-width: 100% !important;
-    -webkit-overflow-scrolling: touch !important;
-}
-
 ak-user-session-list::part(toolbar),
 ak-user-consent-list::part(toolbar),
 ak-user-settings-mfa::part(toolbar),
@@ -2293,30 +2604,31 @@ ak-user-token-list::part(toolbar) {
 :host(ak-user-session-list) ak-chip::part(chip),
 :host(ak-user-reputation-list) ak-chip::part(chip) {
     color: var(--glass-text) !important;
-    background: #333 !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
     border-radius: 12px !important;
 }
 
 :host(ak-user-consent-list) .pf-c-chip,
 :host(ak-user-token-list) .pf-c-chip,
-:host(ak-user-session-list) .pf-c-chip {
-    --pf-c-chip--BackgroundColor: #333;
+:host(ak-user-session-list) .pf-c-chip,
+:host(ak-user-reputation-list) .pf-c-chip {
+    --pf-c-chip--BackgroundColor: rgba(255, 255, 255, 0.08);
     --pf-c-chip__text--Color: var(--glass-text);
 }
 
 :host(ak-user-session-list) .pf-c-label.pf-m-green,
 :host(ak-user-token-list) .pf-c-label.pf-m-green,
 :host(ak-user-settings-mfa) .pf-c-label.pf-m-green {
-    --pf-c-label--BackgroundColor: #1c1c1c;
-    --pf-c-label__icon--Color: #4d9144;
-    --pf-c-label--m-outline__content--before--BorderColor: #3f453f;
+    --pf-c-label--BackgroundColor: rgba(77, 145, 68, 0.16);
+    --pf-c-label__icon--Color: #7fd47a;
+    --pf-c-label--m-outline__content--before--BorderColor: rgba(127, 212, 122, 0.35);
 }
 
 :host(ak-user-session-list) .pf-c-label.pf-m-gray,
 :host(ak-user-token-list) .pf-c-label.pf-m-gray,
 :host(ak-user-settings-mfa) .pf-c-label.pf-m-gray {
-    --pf-c-label--BackgroundColor: #1a1a1a;
+    --pf-c-label--BackgroundColor: rgba(255, 255, 255, 0.08);
 }
 
 pf-tooltip {
@@ -2354,6 +2666,8 @@ ak-interface-admin::part(brand) {
         --pf-c-table--cell--FontSize: 13px;
         --pf-c-table--cell--PaddingLeft: 8px;
         --pf-c-table--cell--PaddingRight: 8px;
+        --glass-table-padding: 6px;
+        --glass-table-margin: 12px;
     }
 
     /* Library: 2 columns of compact app cards */
