@@ -25,6 +25,23 @@ Format: [Semantic Versioning](https://semver.org/) (MAJOR.MINOR.PATCH).
   switcher / "Sign out" menu now matches the rest of the theme — translucent
   blurred panel (`blur(24px)`, 16px radius, soft shadow), white text, rounded
   hover rows, muted descriptions and a glass divider.
+- **User menu open/close animation**: the menu now drops down from the toggle
+  with a short fade + slight scale/translate (`--glass-menu-duration`,
+  `--glass-menu-ease`) and fades back out before the native `hidden` attribute
+  takes effect; the caret rotates while the menu is open. `prefers-reduced-motion`
+  disables both.
+- **Notification and API drawers redesigned as glass** (`<ak-notification-drawer>`,
+  `<ak-api-drawer>`): the right-hand panel is now a translucent blurred sheet
+  (`--glass-drawer-bg`, `--glass-drawer-blur`) with a hairline border and soft
+  shadow. Header title/status and the clear/close actions were restyled (rounded
+  glass icon buttons), list rows became floating glass cards (read rows are
+  dimmer), severity icons are round chips, API paths render as inline code, and
+  timestamps stay muted. The panel now slides in from the right and slides back
+  out with a short fade (`--glass-drawer-duration`, `--glass-drawer-ease`),
+  using `@starting-style` + `allow-discrete` so the close transition survives
+  Authentik's `display: none`; reduced-motion users get an instant toggle. The
+  admin interface panel itself stays opaque; only the shared drawer contents
+  are themed.
 - Per-button `backdrop-filter` removed (the card behind the buttons is already
   blurred): less work per hover frame, no visible difference.
 

@@ -85,7 +85,8 @@ A custom **glassmorphism** login theme for [Authentik](https://goauthentik.io/).
 - **User settings + dashboard theming** — Tabs, tables, app cards consistent glass styling.
 - **Themed app card actions** — The `⋮` dropdown menu on each app is glass-styled.
 - **Static error pages** — "Client ID Error" and other static error pages also themed.
-- **User menu & header** — glass top bar, compact admin pill on phones, "Sign out" dropdown always above the page content.
+- **User menu & header** — glass top bar, compact admin pill on phones, "Sign out" dropdown always above the page content and animated with a short fade/scale drop-down (caret rotates too).
+- **Notification & API drawers** — the slide-out notification panel and API request log match the theme: blurred glass panel, floating glass cards, rounded icon buttons and readable timestamps. The panel slides in from the right and back out (`--glass-drawer-duration`, `--glass-drawer-ease`).
 - **Admin panel safe** — no global button/input rules any more; the admin interface is untouched.
 - **Easy customization** — CSS variables at the top of `theme.css` (background, card width/opacity/radius, logo size, colours).
 
@@ -112,6 +113,12 @@ Open `theme.css` and edit these variables at the top:
     --glass-card-bg: rgba(15, 20, 35, 0.55);               /* Card tint / opacity */
     --glass-card-radius: 24px;                             /* Card corners */
     --glass-logo-size: 220px;                              /* Max logo box (square) */
+    --glass-drawer-bg: rgba(15, 20, 35, 0.62);             /* Notification/API drawer tint */
+    --glass-drawer-blur: blur(28px) saturate(150%);        /* Drawer glass blur */
+    --glass-drawer-duration: 0.36s;                        /* Drawer slide animation */
+    --glass-drawer-ease: cubic-bezier(0.22, 1, 0.36, 1);   /* Drawer animation curve */
+    --glass-menu-duration: 0.18s;                          /* User menu drop-down animation */
+    --glass-menu-ease: cubic-bezier(0.22, 1, 0.36, 1);     /* User menu animation curve */
 }
 ```
 

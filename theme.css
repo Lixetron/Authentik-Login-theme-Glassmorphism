@@ -90,6 +90,16 @@
     --glass-danger-bg: rgba(220, 53, 69, 0.18);
     --glass-danger-border: rgba(220, 53, 69, 0.4);
 
+    /* Side drawer (notifications / API request log) */
+    --glass-drawer-bg: rgba(15, 20, 35, 0.62);
+    --glass-drawer-blur: blur(28px) saturate(150%);
+    --glass-drawer-duration: 0.36s;
+    --glass-drawer-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+    /* User menu ("Sign out") dropdown */
+    --glass-menu-duration: 0.18s;
+    --glass-menu-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
     /* Text */
     --glass-text: #ffffff;
     --glass-text-muted: rgba(255, 255, 255, 0.72);
@@ -1326,6 +1336,45 @@ ak-interface-user::part(page__header),
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
 
+/* Open/close animation. <ak-dropdown> toggles the native `hidden` attribute,
+   so `display` is transitioned discretely (allow-discrete) and @starting-style
+   provides the entry state: the menu drops down from the toggle with a short
+   fade and a barely noticeable scale. */
+:host(ak-user-switcher) .pf-c-dropdown__menu {
+    transform-origin: top right;
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    transition:
+        opacity var(--glass-menu-duration) ease,
+        transform var(--glass-menu-duration) var(--glass-menu-ease),
+        display var(--glass-menu-duration);
+    transition-behavior: allow-discrete;
+}
+
+:host(ak-user-switcher) .pf-c-dropdown__menu[hidden] {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+    pointer-events: none;
+}
+
+@starting-style {
+    :host(ak-user-switcher) .pf-c-dropdown__menu:not([hidden]) {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.98);
+    }
+}
+
+/* The caret follows the menu state (ak-dropdown sets aria-expanded on the
+   toggle button). */
+:host(ak-user-switcher) .pf-c-dropdown__toggle .pf-c-dropdown__toggle-icon {
+    transform-origin: center;
+    transition: transform var(--glass-menu-duration) var(--glass-menu-ease);
+}
+
+:host(ak-user-switcher) .pf-c-dropdown__toggle[aria-expanded="true"] .pf-c-dropdown__toggle-icon {
+    transform: rotate(180deg);
+}
+
 :host(ak-user-switcher) .pf-c-dropdown__menu-item {
     color: var(--glass-text) !important;
     background: transparent !important;
@@ -1352,6 +1401,303 @@ ak-interface-user::part(page__header),
 :host(ak-user-switcher) .pf-c-dropdown .pf-c-divider {
     --pf-c-divider--after--BackgroundColor: rgba(255, 255, 255, 0.15) !important;
     margin: 6px 0 !important;
+}
+
+/* --- Notification / API drawer (bell + API log in the header) --- */
+/* The panel is rendered inside the <ak-interface-user> shadow root and slides
+   in from the right. <ak-notification-drawer> and <ak-api-drawer> both render
+   the same PatternFly notification-drawer markup in their own shadow roots,
+   so one set of :host() rules covers the two drawers. The panel itself carries
+   the glass; every wrapper inside it has to stay transparent for the page
+   behind to show through the blur. */
+:host(ak-interface-user) .pf-c-drawer__panel {
+    --pf-c-drawer__panel--BackgroundColor: transparent;
+    --pf-c-drawer__panel--BoxShadow: none;
+    color: var(--glass-text) !important;
+    background: var(--glass-drawer-bg) !important;
+    -webkit-backdrop-filter: var(--glass-drawer-blur) !important;
+    backdrop-filter: var(--glass-drawer-blur) !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: -18px 0 48px rgba(0, 0, 0, 0.45), inset 1px 0 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Slide in from the right (and back out on close). Authentik hides the closed
+   panel with .pf-u-display-none, so a plain transform transition would never
+   run: `allow-discrete` keeps the panel rendered for the duration of the
+   animation, and @starting-style supplies the off-screen entry position.
+   The final transform (-100%) is the one PatternFly uses to pull the panel
+   into view, so the animation ends exactly where the drawer expects it. */
+:host(ak-interface-user) .pf-c-drawer__panel {
+    --pf-c-drawer__panel--TransitionDuration: var(--glass-drawer-duration);
+    --pf-c-drawer__panel--TransitionProperty: transform, opacity, display;
+    transition-timing-function: var(--glass-drawer-ease);
+    transition-behavior: allow-discrete;
+    opacity: 1;
+}
+
+:host(ak-interface-user) .pf-c-drawer__panel.pf-u-display-none {
+    opacity: 0;
+    pointer-events: none;
+}
+
+@starting-style {
+    :host(ak-interface-user) .pf-c-drawer.pf-m-expanded .pf-c-drawer__main .pf-c-drawer__panel {
+        opacity: 0;
+        transform: translateX(0);
+    }
+}
+
+:host(ak-interface-user) ak-notification-drawer,
+:host(ak-interface-user) ak-api-drawer,
+:host(ak-interface-user) .pf-c-drawer__panel_content,
+:host(ak-notification-drawer) .pf-c-drawer__body,
+:host(ak-api-drawer) .pf-c-drawer__body,
+:host(ak-notification-drawer) .pf-c-notification-drawer,
+:host(ak-api-drawer) .pf-c-notification-drawer,
+:host(ak-notification-drawer) .pf-c-notification-drawer__body,
+:host(ak-api-drawer) .pf-c-notification-drawer__body {
+    color: var(--glass-text) !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Header: a slightly lighter glass strip with a hairline separator */
+:host(ak-notification-drawer) .pf-c-notification-drawer__header,
+:host(ak-api-drawer) .pf-c-notification-drawer__header {
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 18px 20px !important;
+    color: var(--glass-text) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18) !important;
+}
+
+:host(ak-notification-drawer) .pf-c-notification-drawer__header-title,
+:host(ak-api-drawer) .pf-c-notification-drawer__header-title {
+    color: var(--glass-text) !important;
+    font-size: 20px !important;
+    font-weight: 600 !important;
+    line-height: 1.25 !important;
+    text-shadow: var(--glass-text-shadow) !important;
+}
+
+:host(ak-notification-drawer) .pf-c-notification-drawer__header .text span,
+:host(ak-api-drawer) .pf-c-notification-drawer__header .text span {
+    display: block !important;
+    margin-top: 4px !important;
+    color: var(--glass-text-muted) !important;
+    font-size: 13px !important;
+}
+
+:host(ak-notification-drawer) .pf-c-notification-drawer__header .text a,
+:host(ak-api-drawer) .pf-c-notification-drawer__header .text a {
+    display: inline-block !important;
+    margin-top: 6px !important;
+    color: rgba(255, 255, 255, 0.75) !important;
+    font-size: 13px !important;
+    text-decoration: none !important;
+    transition: color 0.2s ease !important;
+}
+
+:host(ak-notification-drawer) .pf-c-notification-drawer__header .text a:hover,
+:host(ak-api-drawer) .pf-c-notification-drawer__header .text a:hover {
+    color: var(--glass-text) !important;
+    text-decoration: underline !important;
+    text-underline-offset: 2px !important;
+}
+
+/* Header actions (clear all / close) as small glass icon buttons */
+:host(ak-notification-drawer) .pf-c-notification-drawer__header-action,
+:host(ak-api-drawer) .pf-c-notification-drawer__header-action {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+:host(ak-notification-drawer) .pf-c-notification-drawer__header-action .pf-c-button.pf-m-plain,
+:host(ak-notification-drawer) .pf-c-notification-drawer__header-action-close .pf-c-button.pf-m-plain,
+:host(ak-api-drawer) .pf-c-notification-drawer__header-action .pf-c-button.pf-m-plain,
+:host(ak-api-drawer) .pf-c-notification-drawer__header-action-close .pf-c-button.pf-m-plain {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 34px !important;
+    height: 34px !important;
+    padding: 0 !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 10px !important;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
+}
+
+:host(ak-notification-drawer) .pf-c-notification-drawer__header-action .pf-c-button.pf-m-plain:hover,
+:host(ak-notification-drawer) .pf-c-notification-drawer__header-action-close .pf-c-button.pf-m-plain:hover,
+:host(ak-api-drawer) .pf-c-notification-drawer__header-action .pf-c-button.pf-m-plain:hover,
+:host(ak-api-drawer) .pf-c-notification-drawer__header-action-close .pf-c-button.pf-m-plain:hover {
+    color: var(--glass-text) !important;
+    background: rgba(255, 255, 255, 0.16) !important;
+    border-color: rgba(255, 255, 255, 0.26) !important;
+}
+
+:host(ak-notification-drawer) .pf-c-notification-drawer__header-action .pf-c-button.pf-m-plain:disabled,
+:host(ak-api-drawer) .pf-c-notification-drawer__header-action .pf-c-button.pf-m-plain:disabled {
+    color: rgba(255, 255, 255, 0.35) !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    cursor: not-allowed !important;
+}
+
+:host(ak-notification-drawer) .pf-c-notification-drawer__header-action .pf-c-button.pf-m-plain::after,
+:host(ak-api-drawer) .pf-c-notification-drawer__header-action .pf-c-button.pf-m-plain::after {
+    border: none !important;
+}
+
+/* List: floating glass cards instead of full-width PF rows */
+:host(ak-notification-drawer) .pf-c-notification-drawer__list,
+:host(ak-api-drawer) .pf-c-notification-drawer__list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    margin: 0 !important;
+    padding: 16px !important;
+    list-style: none !important;
+}
+
+:host(ak-notification-drawer) .pf-c-notification-drawer__list-item,
+:host(ak-api-drawer) .pf-c-notification-drawer__list-item {
+    padding: 14px 16px !important;
+    color: var(--glass-text) !important;
+    background: rgba(255, 255, 255, 0.07) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 14px !important;
+    box-shadow: none !important;
+    transition: background 0.2s ease, border-color 0.2s ease !important;
+}
+
+:host(ak-notification-drawer) .pf-c-notification-drawer__list-item:hover,
+:host(ak-api-drawer) .pf-c-notification-drawer__list-item:hover {
+    background: rgba(255, 255, 255, 0.11) !important;
+    border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+:host(ak-notification-drawer) .pf-c-notification-drawer__list-item.pf-m-read,
+:host(ak-api-drawer) .pf-c-notification-drawer__list-item.pf-m-read {
+    background: rgba(255, 255, 255, 0.035) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+:host(ak-notification-drawer) .pf-c-notification-drawer__list-item.pf-m-read:hover,
+:host(ak-api-drawer) .pf-c-notification-drawer__list-item.pf-m-read:hover {
+    background: rgba(255, 255, 255, 0.07) !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+/* Severity stripe: round the outer corners so the card does not need
+   `overflow: hidden` (which would clip the pf-tooltip popovers). */
+:host(ak-notification-drawer) .pf-c-notification-drawer__list-item::before,
+:host(ak-api-drawer) .pf-c-notification-drawer__list-item::before {
+    top: 0 !important;
+    bottom: 0 !important;
+    border-radius: 14px 0 0 14px !important;
+}
+
+:host(ak-notification-drawer) .pf-c-notification-drawer__list-item-header,
+:host(ak-api-drawer) .pf-c-notification-drawer__list-item-header {
+    align-items: center !important;
+}
+
+:host(ak-notification-drawer) .pf-c-notification-drawer__list-item-header-title,
+:host(ak-api-drawer) .pf-c-notification-drawer__list-item-header-title {
+    color: var(--glass-text) !important;
+    font-size: 14px !important;
+    line-height: 1.35 !important;
+    text-shadow: var(--glass-text-shadow) !important;
+}
+
+/* Severity icon as a small round chip (colour still comes from PF) */
+:host(ak-notification-drawer) .pf-c-notification-drawer__list-item-header-icon,
+:host(ak-api-drawer) .pf-c-notification-drawer__list-item-header-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 22px !important;
+    height: 22px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-radius: 50% !important;
+    font-size: 11px !important;
+}
+
+:host(ak-notification-drawer) .pf-c-notification-drawer__list-item-description,
+:host(ak-api-drawer) .pf-c-notification-drawer__list-item-description {
+    margin: 6px 0 !important;
+    color: rgba(255, 255, 255, 0.82) !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+}
+
+:host(ak-notification-drawer) .pf-c-notification-drawer__list-item-description a,
+:host(ak-api-drawer) .pf-c-notification-drawer__list-item-description a {
+    color: rgba(255, 255, 255, 0.9) !important;
+    text-decoration: underline !important;
+    text-underline-offset: 2px !important;
+}
+
+/* API paths look like inline code */
+:host(ak-api-drawer) .pf-c-notification-drawer__list-item-description {
+    display: block !important;
+    padding: 6px 9px !important;
+    color: rgba(255, 255, 255, 0.82) !important;
+    background: rgba(0, 0, 0, 0.22) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 8px !important;
+    font-family: var(--pf-global--FontFamily--monospace) !important;
+    font-size: 12px !important;
+    text-decoration: none !important;
+    word-break: break-all !important;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
+}
+
+:host(ak-api-drawer) .pf-c-notification-drawer__list-item-description:hover {
+    color: var(--glass-text) !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+:host(ak-notification-drawer) .pf-c-notification-drawer__list-item-timestamp,
+:host(ak-api-drawer) .pf-c-notification-drawer__list-item-timestamp {
+    color: rgba(255, 255, 255, 0.55) !important;
+    font-size: 12px !important;
+}
+
+/* "Mark as read" / "Show details" icon actions on notification cards */
+:host(ak-notification-drawer) .pf-c-notification-drawer__list-item-action .pf-c-dropdown__toggle.pf-m-plain {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 28px !important;
+    height: 28px !important;
+    padding: 0 !important;
+    color: rgba(255, 255, 255, 0.55) !important;
+    background: transparent !important;
+    border-radius: 8px !important;
+    transition: background 0.2s ease, color 0.2s ease !important;
+}
+
+:host(ak-notification-drawer) .pf-c-notification-drawer__list-item-action .pf-c-dropdown__toggle.pf-m-plain:hover {
+    color: var(--glass-text) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Empty / loading state inside the drawer */
+:host(ak-notification-drawer) ak-empty-state,
+:host(ak-api-drawer) ak-empty-state {
+    display: block !important;
+    padding: 40px 24px !important;
 }
 
 ak-interface-user::part(brand) {
@@ -1865,6 +2211,23 @@ ak-interface-admin::part(brand) {
         margin: 8px 0 !important;
     }
 
+    /* Notification / API drawer: tighter padding on phones */
+    :host(ak-notification-drawer) .pf-c-notification-drawer__header,
+    :host(ak-api-drawer) .pf-c-notification-drawer__header {
+        padding: 14px 16px !important;
+    }
+
+    :host(ak-notification-drawer) .pf-c-notification-drawer__list,
+    :host(ak-api-drawer) .pf-c-notification-drawer__list {
+        gap: 8px !important;
+        padding: 12px !important;
+    }
+
+    :host(ak-notification-drawer) .pf-c-notification-drawer__list-item,
+    :host(ak-api-drawer) .pf-c-notification-drawer__list-item {
+        padding: 12px 14px !important;
+    }
+
     /* Compact "Admin interface" pill: the wide desktop pill pushed the user
        menu off-screen on phones (horizontal scroll). */
     :host(ak-interface-user) a[href*="/if/admin/"] {
@@ -1951,6 +2314,16 @@ ak-interface-admin::part(brand) {
 
     ak-flow-card .pf-c-button.pf-m-primary::before {
         display: none !important;
+    }
+
+    :host(ak-interface-user) .pf-c-drawer__panel,
+    :host(ak-user-switcher) .pf-c-dropdown__menu,
+    :host(ak-user-switcher) .pf-c-dropdown__toggle .pf-c-dropdown__toggle-icon {
+        transition: none !important;
+    }
+
+    :host(ak-interface-user) .pf-c-drawer__panel {
+        --pf-c-drawer__panel--TransitionDuration: 0s;
     }
 }
 
